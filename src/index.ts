@@ -1,5 +1,5 @@
 import express, { Express, Request, Response } from 'express';
-import { CancelRequestFromClientMessage, isInitializeMessageFromResource, isRequestFromClient, isResponseToClient, RequestFromClient } from './types';
+import { AcknowledgeMessageToResource, CancelRequestFromClientMessage, isInitializeMessageFromResource, isRequestFromClient, isResponseToClient, RequestFromClient } from './types';
 import { Server as WSServer } from 'ws'
 import * as http from 'http'
 import ResourceManager, { Resource } from './ResourceManager';
@@ -9,13 +9,17 @@ if (!process.env.PROXY_SECRET) {
 }
 
 const expressApp: Express = express()
-// const expressServer = http.createServer(expressApp)
+const expressServer = http.createServer(expressApp)
 
 const port = process.env.PORT || 3030
 
 expressApp.use(express.json())
 
 const resourceManager = new ResourceManager()
+
+expressApp.get('/probe', (req: Request, res: Response) => {
+    res.send('running.')
+})
 
 expressApp.post('/api', (req: Request, res: Response) => {
     ;(async () => {
@@ -40,7 +44,7 @@ expressApp.post('/api', (req: Request, res: Response) => {
                 }
             })
 
-            const response = await resource.waitForResponseToClient(request.requestId, 1000 * 30)
+            const response = await resource.waitForResponseToClient(request.requestId, request.timeoutMsec)
             if (!response) {
                 res.status(504).send({message: `timeout waiting for response`})
                 return
@@ -57,14 +61,14 @@ expressApp.post('/api', (req: Request, res: Response) => {
     })
 })
 
-const wss: WSServer = new WSServer({server: expressApp as any})
+const wss: WSServer = new WSServer({server: expressServer})
 wss.on('connection', (ws) => {
     let initialized = false
     let resourceName = ''
     let resource: Resource | undefined = undefined
     ws.on('message', msg => {
         const messageJson = msg.toString()
-        let message
+        let message: any
         try {
             message = JSON.parse(messageJson)
         }
@@ -97,7 +101,13 @@ wss.on('connection', (ws) => {
                 }
                 ws.send(JSON.stringify(msg))
             }
+            console.info(`RESOURCE CONNECTED: ${resourceName}`)
             resource = resourceManager.addResource(resourceName, handleRequestFromClient, handleCancelRequestFromClient)
+            const acknowledgeMessage: AcknowledgeMessageToResource = {
+                type:'acknowledge'
+            }
+            ws.send(JSON.stringify(acknowledgeMessage))
+            return
         }
         if ((!initialized) || (!resource)) {
             console.error('Expected initialize message from websocket. Closing.')
@@ -129,7 +139,7 @@ wss.on('connection', (ws) => {
     })
 })
 
-expressApp.listen(port, () => {
+expressServer.listen(port, () => {
     return console.log(`[server]: Server is running on port ${port}`)
 })
 

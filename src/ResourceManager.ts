@@ -69,7 +69,7 @@ class ResourceManager {
         return r
     }
     removeResource(resourceName: string) {
-        if (this.hasResource(resourceName)) {
+        if (!this.hasResource(resourceName)) {
             throw Error('unexpected. cannot remove resource that does not exist.')
         }
         delete this.resources[resourceName]
