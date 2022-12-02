@@ -17,10 +17,6 @@ expressApp.use(express.json())
 
 const resourceManager = new ResourceManager()
 
-expressApp.get('/', (req: Request, res: Response) => {
-    res.send('Hello from kachery-resource-proxy')
-})
-
 expressApp.post('/api', (req: Request, res: Response) => {
     ;(async () => {
         const request = req.body
@@ -67,7 +63,16 @@ wss.on('connection', (ws) => {
     let resourceName = ''
     let resource: Resource | undefined = undefined
     ws.on('message', msg => {
-        const message = JSON.parse(msg.toString())
+        const messageJson = msg.toString()
+        let message
+        try {
+            message = JSON.parse(messageJson)
+        }
+        catch(err) {
+            console.error(`Error parsing message. Closing ${resourceName}`)
+            ws.close()
+            return
+        }
         if (isInitializeMessageFromResource(message)) {
             if (initialized) {
                 console.error(`Websocket already initialized: ${resourceName}`)
