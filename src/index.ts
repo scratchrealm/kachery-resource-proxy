@@ -9,7 +9,7 @@ if (!process.env.PROXY_SECRET) {
 }
 
 const expressApp: Express = express()
-const expressServer = http.createServer(expressApp)
+// const expressServer = http.createServer(expressApp)
 
 const port = process.env.PORT || 3030
 
@@ -57,7 +57,7 @@ expressApp.post('/api', (req: Request, res: Response) => {
     })
 })
 
-const wss: WSServer = new WSServer({server: expressServer})
+const wss: WSServer = new WSServer({server: expressApp as any})
 wss.on('connection', (ws) => {
     let initialized = false
     let resourceName = ''
