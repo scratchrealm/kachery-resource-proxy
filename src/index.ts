@@ -63,6 +63,7 @@ expressApp.post('/api', (req: Request, res: Response) => {
 
 const wss: WSServer = new WSServer({server: expressServer})
 wss.on('connection', (ws) => {
+    console.info('New websocket connection.')
     let initialized = false
     let resourceName = ''
     let resource: Resource | undefined = undefined
@@ -109,8 +110,13 @@ wss.on('connection', (ws) => {
             ws.send(JSON.stringify(acknowledgeMessage))
             return
         }
-        if ((!initialized) || (!resource)) {
+        if (!initialized) {
             console.error('Expected initialize message from websocket. Closing.')
+            ws.close()
+            return
+        }
+        if (!resource) {
+            console.error('Unexpected, resource is undefined. Closing.')
             ws.close()
             return
         }
