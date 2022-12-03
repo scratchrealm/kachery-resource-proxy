@@ -84,7 +84,11 @@ wss.on('connection', (ws) => {
                 ws.close()
                 return
             }
-            if (message.proxySecret !== process.env.PROXY_SECRET)
+            if (message.proxySecret !== process.env.PROXY_SECRET) {
+                console.error(`Incorrect proxy secret. Closing.`)
+                ws.close()
+                return
+            }
             initialized = true
             resourceName = message.resourceName
             if (resourceManager.hasResource(resourceName)) {
