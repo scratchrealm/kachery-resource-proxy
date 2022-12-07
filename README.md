@@ -8,7 +8,7 @@ This server is designed to run in the cloud on Heroku.
 
 **Step 1: Create a new Heroku project**
 
-Sign up for a [Heroku](https://heroku.com) account and Create a new app. Same it something like kachery-resource-proxy-example
+Sign up for a [Heroku](https://heroku.com) account and Create a new app. Name it something like `kachery-resource-proxy-example`.
 
 **Step 2: Set up a proxy secret**
 
