@@ -1,6 +1,6 @@
 # kachery-resource-proxy
 
-When a user hosts a Kachery resource ([kachery-resource](https://github.com/scratchrealm/kachery-resource/blob/main/README.md)), they configure the resource to connect with a proxy server (kachery-resource-proxy). The proxy server receives request from computers in a Kachery zone and forwards them to the resource. For example, if a lab wants to make a large number of files available in a Kachery zone, but only wants to upload files on demand as they are requested, then they would host a Kachery resource. Many resources can use the same proxy server, but they must all be in the same zone.
+When hosting a Kachery resource ([kachery-resource](https://github.com/scratchrealm/kachery-resource/blob/main/README.md)), a user configures the resource to connect with a proxy server (kachery-resource-proxy). The proxy server receives requests from computers within the same Kachery zone as the resource and forwards them to the resource. For instance, if a lab wants to make a large number of files available in a Kachery zone but only wants to upload them on demand, they would host a Kachery resource. Multiple resources can use the same proxy server as long as they are all in the same zone.
 
 ## Hosting a proxy server
 
