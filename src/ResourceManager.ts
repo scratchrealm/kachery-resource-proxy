@@ -3,7 +3,7 @@ import { RequestFromClient, ResponseToClient } from "./types";
 
 export class Resource {
     #responseToClientCallbacks: {[id: string]: (response: ResponseToClient) => void} = {}
-    constructor(private onRequestFromClient: (req: RequestFromClient) => void, private onCancelRequestFromClient: (requestId: string) => void) {
+    constructor(public zone: string, private onRequestFromClient: (req: RequestFromClient) => void, private onCancelRequestFromClient: (requestId: string) => void) {
 
     }
     handleRequestFromClient(request: RequestFromClient) {
@@ -60,11 +60,11 @@ class ResourceManager {
     hasResource(resourceName: string) {
         return this.getResource(resourceName) !== undefined
     }
-    addResource(resourceName: string, onRequestFromClient: (request: RequestFromClient) => void, onCancelRequestFromClient: (requestId: string) => void) {
+    addResource(resourceName: string, zone: string, onRequestFromClient: (request: RequestFromClient) => void, onCancelRequestFromClient: (requestId: string) => void) {
         if (this.hasResource(resourceName)) {
             throw Error('unexpected. resource already exists.')
         }
-        const r = new Resource(onRequestFromClient, onCancelRequestFromClient)
+        const r = new Resource(zone, onRequestFromClient, onCancelRequestFromClient)
         this.resources[resourceName] = r
         return r
     }

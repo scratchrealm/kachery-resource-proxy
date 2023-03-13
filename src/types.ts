@@ -3,6 +3,7 @@ import validateObject, { isEqualTo, isNumber, isString, optional } from "./valid
 export type RequestFromClient = {
     type: 'requestFromClient'
     resourceName: string
+    zone: string
     request: any
     timeoutMsec: number
     requestId?: string // added when sending over websocket
@@ -12,6 +13,7 @@ export const isRequestFromClient = (x: any): x is RequestFromClient => {
     return validateObject(x, {
         type: isEqualTo('requestFromClient'),
         resourceName: isString,
+        zone: isString,
         request: () => (true),
         timeoutMsec: isNumber,
         requestId: optional(isString)
@@ -37,6 +39,7 @@ export const isResponseToClient = (x: any): x is ResponseToClient => {
 export type InitializeMessageFromResource = {
     type: 'initialize'
     resourceName: string
+    zone: string
     proxySecret: string
 }
 
@@ -44,6 +47,7 @@ export const isInitializeMessageFromResource = (x: any): x is InitializeMessageF
     return validateObject(x, {
         type: isEqualTo('initialize'),
         resourceName: isString,
+        zone: isString,
         proxySecret: isString
     })
 }

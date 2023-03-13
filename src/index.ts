@@ -21,13 +21,22 @@ expressApp.get('/probe', (req: Request, res: Response) => {
     res.send('running.')
 })
 
-expressApp.post('/api', (req: Request, res: Response) => {
+expressApp.post('/r/:resource', (req: Request, res: Response) => {
     ;(async () => {
         const request = req.body
+        const resourceName = req.params.resource
         if (isRequestFromClient(request)) {
-            const resource = resourceManager.getResource(request.resourceName)
+            if (request.resourceName !== resourceName) {
+                res.status(500).send({message: `Resource name mismatch: ${request.resourceName} <> ${resourceName}`})
+                return
+            }
+            const resource = resourceManager.getResource(resourceName)
             if (!resource) {
-                res.status(404).send({message: `resource not found: ${request.resourceName}`})
+                res.status(404).send({message: `resource not found: ${resourceName}`})
+                return
+            }
+            if (request.zone !== resource.zone) {
+                res.status(500).send({message: `Zone mismatch: ${request.zone} <> ${resource.zone}`})
                 return
             }
             if (request.requestId) {
@@ -107,7 +116,7 @@ wss.on('connection', (ws) => {
                 ws.send(JSON.stringify(msg))
             }
             console.info(`RESOURCE CONNECTED: ${resourceName}`)
-            resource = resourceManager.addResource(resourceName, handleRequestFromClient, handleCancelRequestFromClient)
+            resource = resourceManager.addResource(resourceName, message.zone, handleRequestFromClient, handleCancelRequestFromClient)
             const acknowledgeMessage: AcknowledgeMessageToResource = {
                 type:'acknowledge'
             }
