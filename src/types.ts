@@ -53,7 +53,7 @@ export type PingMessageFromResource = {
     type: 'ping'
 }
 
-export const isPingMessageFromResource(x: any): x is PingMessageFromResource = {
+export const isPingMessageFromResource = (x: any): x is PingMessageFromResource => {
     return validateObject(x, {
         type: isEqualTo('ping')
     })
