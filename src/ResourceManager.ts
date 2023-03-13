@@ -3,7 +3,7 @@ import { RequestFromClient, ResponseToClient } from "./types";
 
 export class Resource {
     #responseToClientCallbacks: {[id: string]: (response: ResponseToClient) => void} = {}
-    constructor(public zone: string, private onRequestFromClient: (req: RequestFromClient) => void, private onCancelRequestFromClient: (requestId: string) => void) {
+    constructor(public zone: string, private onRequestFromClient: (req: RequestFromClient) => void) {
 
     }
     handleRequestFromClient(request: RequestFromClient) {
@@ -14,25 +14,12 @@ export class Resource {
             this.#responseToClientCallbacks[id](response)
         }
     }
-    cancelRequestFromClient(requestId: string) {
-        this.onCancelRequestFromClient(requestId)
-    }
     async waitForResponseToClient(requestId: string, timeoutMsec: number): Promise<ResponseToClient | undefined> {
         return new Promise((resolve) => {
             let finished = false
-            const cancelCallback = this._onResponseToClient(response => {
-                if (response.requestId === requestId) {
-                    if (!finished) {
-                        finished = true
-                        cancelCallback()
-                        resolve(response)
-                    }
-                }
-            })
             setTimeout(() => {
                 if (!finished) {
                     finished = true
-                    cancelCallback()
                     resolve(undefined)
                 }
             }, timeoutMsec)
@@ -60,11 +47,11 @@ class ResourceManager {
     hasResource(resourceName: string) {
         return this.getResource(resourceName) !== undefined
     }
-    addResource(resourceName: string, zone: string, onRequestFromClient: (request: RequestFromClient) => void, onCancelRequestFromClient: (requestId: string) => void) {
+    addResource(resourceName: string, zone: string, onRequestFromClient: (request: RequestFromClient) => void) {
         if (this.hasResource(resourceName)) {
             throw Error('unexpected. resource already exists.')
         }
-        const r = new Resource(zone, onRequestFromClient, onCancelRequestFromClient)
+        const r = new Resource(zone, onRequestFromClient)
         this.resources[resourceName] = r
         return r
     }

@@ -1,8 +1,8 @@
 import express, { Express, Request, Response } from 'express';
-import { AcknowledgeMessageToResource, CancelRequestFromClientMessage, isInitializeMessageFromResource, isPingMessageFromResource, isRequestFromClient, isResponseToClient, RequestFromClient } from './types';
-import { Server as WSServer } from 'ws'
-import * as http from 'http'
+import * as http from 'http';
+import { Server as WSServer } from 'ws';
 import ResourceManager, { Resource } from './ResourceManager';
+import { AcknowledgeMessageToResource, isInitializeMessageFromResource, isPingMessageFromResource, isRequestFromClient, isResponseToClient, RequestFromClient } from './types';
 
 if (!process.env.PROXY_SECRET) {
     throw Error(`Environment variable not set: PROXY_SECRET`)
@@ -48,9 +48,9 @@ expressApp.post('/r/:resource', (req: Request, res: Response) => {
 
             let gotResponse = false
             req.on('close', () => {
-                if (!gotResponse) {
-                    resource.cancelRequestFromClient(request.requestId)
-                }
+                // if (!gotResponse) {
+                //     resource.cancelRequestFromClient(request.requestId)
+                // }
             })
 
             const response = await resource.waitForResponseToClient(request.requestId, request.timeoutMsec)
@@ -108,15 +108,8 @@ wss.on('connection', (ws) => {
             const handleRequestFromClient = (request: RequestFromClient) => {
                 ws.send(JSON.stringify(request))
             }
-            const handleCancelRequestFromClient = (requestId: string) => {
-                const msg: CancelRequestFromClientMessage = {
-                    type: 'cancelRequestFromClient',
-                    requestId
-                }
-                ws.send(JSON.stringify(msg))
-            }
             console.info(`RESOURCE CONNECTED: ${resourceName}`)
-            resource = resourceManager.addResource(resourceName, message.zone, handleRequestFromClient, handleCancelRequestFromClient)
+            resource = resourceManager.addResource(resourceName, message.zone, handleRequestFromClient)
             const acknowledgeMessage: AcknowledgeMessageToResource = {
                 type:'acknowledge'
             }

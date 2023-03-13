@@ -72,16 +72,3 @@ export const isAcknowledgeMessageToResource = (x: any): x is AcknowledgeMessageT
         type: isEqualTo('acknowledge')
     })
 }
-
-export type CancelRequestFromClientMessage = {
-    type: 'cancelRequestFromClient'
-    requestId: string
-}
-
-export const isCancelRequestFromClientMessage = (x: any): x is CancelRequestFromClientMessage => {
-    return validateObject(x, {
-        type: isEqualTo('cancelRequestFromClient'),
-        requestId: isString
-    })
-}
-
