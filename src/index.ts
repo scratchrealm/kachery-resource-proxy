@@ -1,5 +1,5 @@
 import express, { Express, Request, Response } from 'express';
-import { AcknowledgeMessageToResource, CancelRequestFromClientMessage, isInitializeMessageFromResource, isRequestFromClient, isResponseToClient, RequestFromClient } from './types';
+import { AcknowledgeMessageToResource, CancelRequestFromClientMessage, isInitializeMessageFromResource, isPingMessageFromResource, isRequestFromClient, isResponseToClient, RequestFromClient } from './types';
 import { Server as WSServer } from 'ws'
 import * as http from 'http'
 import ResourceManager, { Resource } from './ResourceManager';
@@ -131,6 +131,9 @@ wss.on('connection', (ws) => {
                 return
             }
             resource.handleResponseToClient(message)
+        }
+        else if (isPingMessageFromResource(message)) {
+            // ping
         }
         else {
             console.error(`Unexpected message from resource. Closing ${resourceName}`)

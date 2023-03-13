@@ -48,6 +48,17 @@ export const isInitializeMessageFromResource = (x: any): x is InitializeMessageF
     })
 }
 
+// to keep alive
+export type PingMessageFromResource = {
+    type: 'ping'
+}
+
+export const isPingMessageFromResource(x: any): x is PingMessageFromResource = {
+    return validateObject(x, {
+        type: isEqualTo('ping')
+    })
+}
+
 export type AcknowledgeMessageToResource = {
     type: 'acknowledge'
 }
