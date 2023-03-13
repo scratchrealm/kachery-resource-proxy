@@ -17,9 +17,19 @@ export class Resource {
     async waitForResponseToClient(requestId: string, timeoutMsec: number): Promise<ResponseToClient | undefined> {
         return new Promise((resolve) => {
             let finished = false
+            const cancelCallback = this._onResponseToClient(response => {
+                if (response.requestId === requestId) {
+                    if (!finished) {
+                        finished = true
+                        cancelCallback()
+                        resolve(response.response)
+                    }
+                }
+            })
             setTimeout(() => {
                 if (!finished) {
                     finished = true
+                    cancelCallback()
                     resolve(undefined)
                 }
             }, timeoutMsec)
